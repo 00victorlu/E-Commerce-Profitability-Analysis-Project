@@ -1,0 +1,473 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.dash{background:var(--color-background-tertiary);padding:12px;min-height:100vh}
+.topbar{background:#1F3864;color:#fff;padding:10px 16px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.topbar-title{font-size:14px;font-weight:500;letter-spacing:.3px}
+.topbar-sub{font-size:11px;opacity:.7}
+.nav{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.nav-btn{padding:6px 14px;font-size:12px;border-radius:20px;border:1px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans);transition:all .15s}
+.nav-btn.active{background:#1F3864;color:#fff;border-color:#1F3864}
+.page{display:none}
+.page.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.kpi{background:var(--color-background-primary);border-radius:8px;border:0.5px solid var(--color-border-tertiary);padding:10px 12px}
+.kpi-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.kpi-val{font-size:20px;font-weight:500;color:var(--color-text-primary);line-height:1.1}
+.kpi-sub{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+.kpi.accent{border-left:3px solid #2E75B6}
+.row2{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-bottom:12px}
+.row2b{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.card{background:var(--color-background-primary);border-radius:8px;border:0.5px solid var(--color-border-tertiary);padding:12px}
+.card-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.chart-wrap{position:relative;width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:11px;color:var(--color-text-secondary)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend span b{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.filter-row select{font-size:12px;padding:5px 8px;border-radius:6px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans);cursor:pointer}
+.filter-label{font-size:11px;color:var(--color-text-secondary)}
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--color-text-secondary);padding:5px 8px;border-bottom:1px solid var(--color-border-tertiary);text-align:left;font-weight:500}
+.tbl td{padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500}
+.badge-g{background:#E2EFDA;color:#375623}
+.badge-r{background:#FCE4D6;color:#C00000}
+.badge-a{background:#FFF2CC;color:#7F6000}
+.bar-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px}
+.bar-label{width:90px;color:var(--color-text-secondary);text-align:right;flex-shrink:0;font-size:10px}
+.bar-track{flex:1;background:var(--color-background-secondary);border-radius:3px;height:14px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:5px;font-size:9px;color:#fff;font-weight:500}
+.sparkline-row{display:flex;gap:3px;align-items:flex-end;height:40px;margin-top:6px}
+.sp-bar{flex:1;border-radius:2px 2px 0 0;min-width:2px}
+.indicator{display:flex;align-items:center;gap:4px;font-size:11px}
+.indicator-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.donut-wrap{display:flex;align-items:center;gap:12px}
+.donut-legend{display:flex;flex-direction:column;gap:5px;font-size:11px;min-width:100px}
+.donut-item{display:flex;align-items:center;gap:5px}
+.donut-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.meter{margin-bottom:8px}
+.meter-top{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
+.meter-name{color:var(--color-text-secondary)}
+.meter-val{color:var(--color-text-primary);font-weight:500}
+.meter-track{height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden}
+.meter-bar{height:100%;border-radius:4px}
+.full-row{margin-bottom:12px}
+.timeline{display:flex;flex-direction:column;gap:3px}
+.tl-row{display:grid;grid-template-columns:70px 1fr 50px;gap:6px;align-items:center;font-size:10px}
+.tl-label{color:var(--color-text-secondary);text-align:right}
+.tl-bar-wrap{background:var(--color-background-secondary);border-radius:3px;height:12px;overflow:hidden}
+.tl-bar-fill{height:100%;border-radius:3px}
+.tl-val{color:var(--color-text-primary);font-weight:500;text-align:right}
+.summary-box{background:var(--color-background-secondary);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--color-text-secondary);border-left:3px solid #2E75B6;margin-top:8px;line-height:1.5}
+.summary-box strong{color:var(--color-text-primary)}
+</style>
+
+<div class="dash">
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">E-Commerce Business Intelligence Dashboard</div>
+    <div class="topbar-sub">Prepared by Victor Lu &nbsp;·&nbsp; Analysis Period: Jan 2024 – Dec 2025 &nbsp;·&nbsp; 2,000 orders</div>
+  </div>
+  <div style="font-size:11px;opacity:.6">Final Draft</div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchPage('overview',this)">Overview</button>
+  <button class="nav-btn" onclick="switchPage('profitability',this)">Profitability</button>
+  <button class="nav-btn" onclick="switchPage('channels',this)">Channels</button>
+  <button class="nav-btn" onclick="switchPage('returns',this)">Returns</button>
+  <button class="nav-btn" onclick="switchPage('marketing',this)">Marketing ROI</button>
+  <button class="nav-btn" onclick="switchPage('budget',this)">Budget Cut</button>
+</div>
+
+<!-- OVERVIEW PAGE -->
+<div class="page active" id="page-overview">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Total Orders</div><div class="kpi-val">2,000</div><div class="kpi-sub">2024–2025</div></div>
+    <div class="kpi accent"><div class="kpi-label">Gross Revenue</div><div class="kpi-val">$278K</div><div class="kpi-sub">Before discounts & returns</div></div>
+    <div class="kpi accent"><div class="kpi-label">Total Profit</div><div class="kpi-val">$56.3K</div><div class="kpi-sub">After all costs</div></div>
+    <div class="kpi accent"><div class="kpi-label">Overall Margin</div><div class="kpi-val">23.84%</div><div class="kpi-sub">Net profit / net revenue</div></div>
+    <div class="kpi accent"><div class="kpi-label">Total Refunds</div><div class="kpi-val">$20.6K</div><div class="kpi-sub">7.20% return rate</div></div>
+    <div class="kpi accent"><div class="kpi-label">Marketing ROAS</div><div class="kpi-val">16.18x</div><div class="kpi-sub">$503K spend → $8.15M</div></div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Profit by Category</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c1" role="img" aria-label="Horizontal bar chart showing profit by category. Electronics leads at $13,973, Books lowest at $2,250.">Electronics $13,973, Toys $8,786, Sports $7,597, Food & Bev $7,592, Home & Kitchen $6,689, Clothing $6,272, Beauty $3,175, Books $2,250.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue by Channel</div>
+      <div class="donut-wrap" style="margin-top:10px">
+        <div style="position:relative;width:110px;height:110px;flex-shrink:0"><canvas id="c2" role="img" aria-label="Donut chart of net revenue by channel. Website 39%, Mobile App 30%, Marketplace 21%, Social Commerce 9%.">Website 39%, Mobile App 30%, Marketplace 21%, Social Commerce 9%.</canvas></div>
+        <div class="donut-legend">
+          <div class="donut-item"><div class="donut-sq" style="background:#2E75B6"></div><span>Website 39%</span></div>
+          <div class="donut-item"><div class="donut-sq" style="background:#375623"></div><span>Mobile App 30%</span></div>
+          <div class="donut-item"><div class="donut-sq" style="background:#7F6000"></div><span>Marketplace 21%</span></div>
+          <div class="donut-item"><div class="donut-sq" style="background:#C00000"></div><span>Social Commerce 9%</span></div>
+        </div>
+      </div>
+      <div class="summary-box" style="margin-top:12px">Website + Mobile App hold <strong>69% of revenue</strong> with <strong>zero platform fees</strong>.</div>
+    </div>
+  </div>
+
+  <div class="row2b">
+    <div class="card">
+      <div class="card-title">Monthly ROAS Trend (24 months)</div>
+      <div class="chart-wrap" style="height:140px"><canvas id="c3" role="img" aria-label="Line chart showing monthly ROAS across 24 months. Range from 6.77 to 25.53. Notable dips in Apr 2024, Nov 2024, Jul 2025, Sep 2025.">Monthly ROAS fluctuates between 6.77 (Sep 2025) and 25.53 (Mar 2024).</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Marketing Spend vs Revenue Efficiency</div>
+      <div style="margin-top:4px">
+        <div class="meter"><div class="meter-top"><span class="meter-name">TikTok Ads</span><span class="meter-val">24.02x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:100%;background:#375623"></div></div></div>
+        <div class="meter"><div class="meter-top"><span class="meter-name">Influencer</span><span class="meter-val">22.70x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:95%;background:#375623"></div></div></div>
+        <div class="meter"><div class="meter-top"><span class="meter-name">Instagram Ads</span><span class="meter-val">15.73x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:65%;background:#2E75B6"></div></div></div>
+        <div class="meter"><div class="meter-top"><span class="meter-name">Google Ads</span><span class="meter-val">14.38x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:60%;background:#7F6000"></div></div></div>
+        <div class="meter"><div class="meter-top"><span class="meter-name">Facebook Ads</span><span class="meter-val">11.45x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:48%;background:#C00000"></div></div></div>
+        <div class="meter"><div class="meter-top"><span class="meter-name">Email Marketing</span><span class="meter-val">4.81x ROAS</span></div><div class="meter-track"><div class="meter-bar" style="width:20%;background:#C00000"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFITABILITY PAGE -->
+<div class="page" id="page-profitability">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Best Margin</div><div class="kpi-val">31.13%</div><div class="kpi-sub">Electronics</div></div>
+    <div class="kpi accent"><div class="kpi-label">Worst Margin</div><div class="kpi-val">11.94%</div><div class="kpi-sub">Books</div></div>
+    <div class="kpi accent"><div class="kpi-label">Margin Gap</div><div class="kpi-val">19.2 pts</div><div class="kpi-sub">Driver: shipping cost</div></div>
+    <div class="kpi accent"><div class="kpi-label">Total Profit</div><div class="kpi-val">$56.3K</div><div class="kpi-sub">All categories positive</div></div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Profit Margin % by Category</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c4" role="img" aria-label="Horizontal bar chart of profit margin by category. Electronics 31.13%, Books 11.94%.">Electronics 31.13%, Toys 26.15%, Home Kitchen 25.37%, Food Bev 24.76%, Sports 23.50%, Clothing 19.99%, Beauty 17.39%, Books 11.94%.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Shipping Cost vs Margin — The Key Driver</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="c5" role="img" aria-label="Scatter chart showing shipping cost percentage vs profit margin. Strong negative correlation — higher shipping means lower margin.">Higher shipping cost percent correlates with lower profit margin.</canvas></div>
+    </div>
+  </div>
+
+  <div class="card full-row">
+    <div class="card-title">Full Category Breakdown</div>
+    <table class="tbl">
+      <thead><tr><th>Category</th><th>Orders</th><th>Profit</th><th>Margin %</th><th>Shipping %</th><th>Product Cost %</th><th>Return Rate</th><th>Rating</th></tr></thead>
+      <tbody>
+        <tr><td>Electronics</td><td>267</td><td>$13,973</td><td>31.13%</td><td>13.50%</td><td>38.00%</td><td>8.61%</td><td><span class="badge badge-g">Top</span></td></tr>
+        <tr><td>Toys</td><td>257</td><td>$8,786</td><td>26.15%</td><td>17.25%</td><td>39.94%</td><td>7.00%</td><td><span class="badge badge-g">Top</span></td></tr>
+        <tr><td>Home & Kitchen</td><td>200</td><td>$6,689</td><td>25.37%</td><td>16.16%</td><td>39.99%</td><td>6.00%</td><td><span class="badge badge-g">Top</span></td></tr>
+        <tr><td>Food & Beverage</td><td>247</td><td>$7,592</td><td>24.76%</td><td>17.47%</td><td>38.77%</td><td>5.67%</td><td><span class="badge badge-g">Good</span></td></tr>
+        <tr><td>Sports</td><td>292</td><td>$7,597</td><td>23.50%</td><td>18.46%</td><td>41.90%</td><td>7.19%</td><td><span class="badge badge-g">Good</span></td></tr>
+        <tr><td>Clothing</td><td>293</td><td>$6,272</td><td>19.99%</td><td>19.84%</td><td>40.90%</td><td>8.19%</td><td><span class="badge badge-a">Mid</span></td></tr>
+        <tr><td>Beauty</td><td>205</td><td>$3,175</td><td>17.39%</td><td>24.79%</td><td>41.16%</td><td>5.85%</td><td><span class="badge badge-a">Mid</span></td></tr>
+        <tr><td>Books</td><td>239</td><td>$2,250</td><td>11.94%</td><td>27.94%</td><td>39.96%</td><td>8.37%</td><td><span class="badge badge-r">Low</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHANNELS PAGE -->
+<div class="page" id="page-channels">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Best Channel</div><div class="kpi-val">$36.32</div><div class="kpi-sub">Mobile App / order</div></div>
+    <div class="kpi accent"><div class="kpi-label">Worst Channel</div><div class="kpi-val">$15.40</div><div class="kpi-sub">Marketplace / order</div></div>
+    <div class="kpi accent"><div class="kpi-label">Max Fee Drag</div><div class="kpi-val">55.2%</div><div class="kpi-sub">Marketplace pre-fee profit lost</div></div>
+    <div class="kpi accent"><div class="kpi-label">Fee-Free Revenue</div><div class="kpi-val">69%</div><div class="kpi-sub">Website + Mobile App share</div></div>
+  </div>
+
+  <div class="row2b">
+    <div class="card">
+      <div class="card-title">Profit per Order by Channel</div>
+      <div class="chart-wrap" style="height:180px"><canvas id="c6" role="img" aria-label="Bar chart comparing profit per order by channel. Mobile App $36.32, Website $31.60, Social Commerce $17.11, Marketplace $15.40.">Mobile App $36.32, Website $31.60, Social Commerce $17.11, Marketplace $15.40.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Platform Fee Drag — Before vs After Fees</div>
+      <div class="chart-wrap" style="height:180px"><canvas id="c7" role="img" aria-label="Grouped bar chart showing profit per order before and after platform fees. Marketplace drops from $34.37 to $15.40 after $18.97 fee.">Before/after fees: Mobile App $36.32/$36.32 (no fee), Website $31.60/$31.60 (no fee), Social Commerce $26.98/$17.11, Marketplace $34.37/$15.40.</canvas></div>
+    </div>
+  </div>
+
+  <div class="card full-row">
+    <div class="card-title">Channel Detail</div>
+    <table class="tbl">
+      <thead><tr><th>Channel</th><th>Orders</th><th>Net Revenue</th><th>Total Profit</th><th>Profit/Order</th><th>Margin %</th><th>Avg Fee</th><th>Fee Drag %</th><th>Return Rate</th></tr></thead>
+      <tbody>
+        <tr><td>Mobile App</td><td>589</td><td>$71,893</td><td>$21,393</td><td><strong>$36.32</strong></td><td>29.76%</td><td>$0.00</td><td>0.0%</td><td>7.30%</td></tr>
+        <tr><td>Website</td><td>795</td><td>$92,991</td><td>$25,118</td><td><strong>$31.60</strong></td><td>27.01%</td><td>$0.00</td><td>0.0%</td><td>7.04%</td></tr>
+        <tr><td>Social Commerce</td><td>197</td><td>$21,929</td><td>$3,371</td><td><strong>$17.11</strong></td><td>15.37%</td><td>$9.87</td><td>36.6%</td><td><span class="badge badge-r">9.14%</span></td></tr>
+        <tr><td>Marketplace</td><td>419</td><td>$49,505</td><td>$6,452</td><td><strong>$15.40</strong></td><td>13.03%</td><td><span class="badge badge-r">$18.97</span></td><td><span class="badge badge-r">55.2%</span></td><td>6.44%</td></tr>
+      </tbody>
+    </table>
+    <div class="summary-box">Without platform fees, <strong>Marketplace would earn $34.37/order</strong> — nearly matching Mobile App. The $18.97/order fee consumes 55.2% of pre-fee profit and makes it the worst-performing channel.</div>
+  </div>
+</div>
+
+<!-- RETURNS PAGE -->
+<div class="page" id="page-returns">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Total Returned</div><div class="kpi-val">144</div><div class="kpi-sub">of 2,000 orders (7.20%)</div></div>
+    <div class="kpi accent"><div class="kpi-label">Revenue Lost</div><div class="kpi-val">$20,582</div><div class="kpi-sub">7.40% of gross revenue</div></div>
+    <div class="kpi accent"><div class="kpi-label">Highest Rate</div><div class="kpi-val">8.61%</div><div class="kpi-sub">Electronics</div></div>
+    <div class="kpi accent"><div class="kpi-label">Anomaly</div><div class="kpi-val">9.50%</div><div class="kpi-sub">Food & Bev revenue loss %</div></div>
+  </div>
+
+  <div class="row2b">
+    <div class="card">
+      <div class="card-title">Return Rate by Category</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c8" role="img" aria-label="Horizontal bar chart of return rates by category. Electronics 8.61% highest, Food & Beverage 5.67% lowest.">Electronics 8.61%, Books 8.37%, Clothing 8.19%, Sports 7.19%, Toys 7.00%, Home Kitchen 6.00%, Beauty 5.85%, Food Bev 5.67%.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue Lost vs Return Rate — Anomaly View</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c9" role="img" aria-label="Bubble chart showing return rate vs revenue lost. Food & Beverage is anomalous — lowest return rate but highest revenue loss percentage.">Food & Beverage anomaly: 5.67% return rate but $3,505 revenue lost (9.50% of gross).</canvas></div>
+    </div>
+  </div>
+
+  <div class="card full-row">
+    <div class="card-title">Return Rate by Channel</div>
+    <div class="chart-wrap" style="height:120px"><canvas id="c10" role="img" aria-label="Bar chart of return rates by channel. Social Commerce highest at 9.14%, Marketplace lowest at 6.44%.">Social Commerce 9.14%, Mobile App 7.30%, Website 7.04%, Marketplace 6.44%.</canvas></div>
+    <div class="summary-box" style="margin-top:10px"><strong>Social Commerce</strong> has the highest return rate (9.14%) AND the highest revenue loss % (9.01%) — suggesting lower purchase intent. <strong>Food & Beverage</strong> is the most anomalous: lowest return rate (5.67%) but highest revenue loss % (9.50%) — high-value items are being returned disproportionately.</div>
+  </div>
+</div>
+
+<!-- MARKETING PAGE -->
+<div class="page" id="page-marketing">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Total Spend</div><div class="kpi-val">$503.5K</div><div class="kpi-sub">6 platforms, 24 months</div></div>
+    <div class="kpi accent"><div class="kpi-label">Attributed Revenue</div><div class="kpi-val">$8.15M</div><div class="kpi-sub">From all platforms</div></div>
+    <div class="kpi accent"><div class="kpi-label">Best ROAS</div><div class="kpi-val">24.02x</div><div class="kpi-sub">TikTok Ads</div></div>
+    <div class="kpi accent"><div class="kpi-label">Worst ROAS</div><div class="kpi-val">4.81x</div><div class="kpi-sub">Email Marketing</div></div>
+    <div class="kpi accent"><div class="kpi-label">Best CPA</div><div class="kpi-val">$3.93</div><div class="kpi-sub">TikTok Ads</div></div>
+    <div class="kpi accent"><div class="kpi-label">Worst CPA</div><div class="kpi-val">$26.01</div><div class="kpi-sub">Email Marketing</div></div>
+  </div>
+
+  <div class="row2b">
+    <div class="card">
+      <div class="card-title">ROAS by Platform</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c11" role="img" aria-label="Horizontal bar chart of ROAS by platform. TikTok 24.02x, Email Marketing 4.81x.">TikTok 24.02x, Influencer 22.70x, Instagram 15.73x, Google 14.38x, Facebook 11.45x, Email 4.81x.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Efficiency Gap (Revenue % minus Spend %)</div>
+      <div class="chart-wrap" style="height:190px"><canvas id="c12" role="img" aria-label="Bar chart showing efficiency gap per platform. Influencer +7.81%, TikTok +5.50%, Facebook -6.18%, Email -3.42%.">Influencer +7.81%, TikTok +5.50%, Instagram -0.36%, Google -3.37%, Email -3.42%, Facebook -6.18%.</canvas></div>
+    </div>
+  </div>
+
+  <div class="card full-row">
+    <div class="card-title">Monthly ROAS Trend — 24 Months</div>
+    <div class="chart-wrap" style="height:150px"><canvas id="c13" role="img" aria-label="Line chart showing monthly ROAS. Dips in Apr 2024 (9.77), Nov 2024 (9.90), Jul 2025 (9.64), Sep 2025 (6.77).">Monthly ROAS ranges from 6.77 to 25.53. Key low months: Apr 2024, Nov 2024, Jul 2025, Sep 2025.</canvas></div>
+    <div class="legend" style="margin-top:6px">
+      <span><b style="background:#375623"></b>ROAS ≥ 20 (Efficient)</span>
+      <span><b style="background:#2E75B6"></b>ROAS 15–20 (Acceptable)</span>
+      <span><b style="background:#7F6000"></b>ROAS 10–15 (Below target)</span>
+      <span><b style="background:#C00000"></b>ROAS &lt; 10 (Cut)</span>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET CUT PAGE -->
+<div class="page" id="page-budget">
+  <div class="kpi-row">
+    <div class="kpi accent"><div class="kpi-label">Total Budget</div><div class="kpi-val">$503.5K</div><div class="kpi-sub">Current spend</div></div>
+    <div class="kpi accent"><div class="kpi-label">Cut Target (20%)</div><div class="kpi-val">$100.7K</div><div class="kpi-sub">Required saving</div></div>
+    <div class="kpi accent"><div class="kpi-label">Achieved Saving</div><div class="kpi-val">$100.6K</div><div class="kpi-sub">Within 0.1% of target ✓</div></div>
+    <div class="kpi accent"><div class="kpi-label">New Budget</div><div class="kpi-val">$402.9K</div><div class="kpi-sub">After cuts</div></div>
+  </div>
+
+  <div class="row2b">
+    <div class="card">
+      <div class="card-title">Current vs Proposed Spend by Platform</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="c14" role="img" aria-label="Grouped bar chart comparing current vs proposed spend. Email Marketing cut to $0, Facebook halved to $53,226, Google trimmed to $129,664.">Email Marketing: $24,461 → $0. Facebook Ads: $106,452 → $53,226. Google Ads: $152,546 → $129,664. Others unchanged.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cut Plan — Platform Summary</div>
+      <table class="tbl">
+        <thead><tr><th>Platform</th><th>ROAS</th><th>Cut %</th><th>Saving</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Email Marketing</td><td>4.81x</td><td>100%</td><td>$24,461</td><td><span class="badge badge-r">Eliminate</span></td></tr>
+          <tr><td>Facebook Ads</td><td>11.45x</td><td>50%</td><td>$53,226</td><td><span class="badge badge-r">Halve</span></td></tr>
+          <tr><td>Google Ads</td><td>14.38x</td><td>15%</td><td>$22,882</td><td><span class="badge badge-a">Trim</span></td></tr>
+          <tr><td>Instagram Ads</td><td>15.73x</td><td>0%</td><td>—</td><td><span class="badge badge-g">Hold</span></td></tr>
+          <tr><td>Influencer</td><td>22.70x</td><td>0%</td><td>—</td><td><span class="badge badge-g">Protect</span></td></tr>
+          <tr><td>TikTok Ads</td><td>24.02x</td><td>0%</td><td>—</td><td><span class="badge badge-g">Protect</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card full-row">
+    <div class="card-title">Priority Month × Platform Cuts — Sorted by ROAS (Lowest First)</div>
+    <div class="timeline">
+      <div class="tl-row" style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px"><span style="text-align:right">Platform/Month</span><span style="padding-left:4px">ROAS vs Spend</span><span>Save</span></div>
+      <div class="tl-row"><span class="tl-label">Email Dec '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:2.8%;background:#C00000;padding-left:3px;font-size:9px;color:#fff">0.67x</div></div><span class="tl-val">$360</span></div>
+      <div class="tl-row"><span class="tl-label">Email Oct '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:5%;background:#C00000">1.21x</div></div><span class="tl-val">$158</span></div>
+      <div class="tl-row"><span class="tl-label">FB Sep '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:10.5%;background:#C00000">2.51x</div></div><span class="tl-val">$776</span></div>
+      <div class="tl-row"><span class="tl-label">Google Sep '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:16%;background:#C00000">3.84x</div></div><span class="tl-val">$1,300</span></div>
+      <div class="tl-row"><span class="tl-label">FB Nov '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:18.5%;background:#C00000">4.44x</div></div><span class="tl-val">$1,377</span></div>
+      <div class="tl-row"><span class="tl-label">Google Jul '25</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:17.8%;background:#7F6000">4.27x</div></div><span class="tl-val">$1,169</span></div>
+      <div class="tl-row"><span class="tl-label">FB Nov '24</span><div class="tl-bar-wrap"><div class="tl-bar-fill" style="width:27.5%;background:#7F6000">6.60x</div></div><span class="tl-val">$1,711</span></div>
+    </div>
+    <div class="summary-box" style="margin-top:10px">Cutting Email Marketing entirely, halving Facebook Ads, and trimming Google Ads 15% achieves <strong>$100,569 in savings</strong> — 0.1% below the $100,701 target. <strong>TikTok, Influencer, and Instagram are untouched.</strong></div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function switchPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const textColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { callbacks: {} } },
+  scales: {
+    x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
+    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+  }
+};
+
+const cats = ['Electronics','Toys','Home & Kitchen','Food & Bev.','Sports','Clothing','Beauty','Books'];
+const margins = [31.13,26.15,25.37,24.76,23.50,19.99,17.39,11.94];
+const profits = [13973,8786,6689,7592,7597,6272,3175,2250];
+const shipPct = [13.50,17.25,16.16,17.47,18.46,19.84,24.79,27.94];
+const catColors = ['#375623','#375623','#375623','#375623','#375623','#7F6000','#7F6000','#C00000'];
+
+const platforms = ['TikTok Ads','Influencer','Instagram Ads','Google Ads','Facebook Ads','Email Marketing'];
+const roas = [24.02,22.70,15.73,14.38,11.45,4.81];
+const spends = [57229,97663,65154,152546,106452,24461];
+const gaps = [5.50,7.81,-0.36,-3.37,-6.18,-3.42];
+const platformColors = ['#375623','#375623','#2E75B6','#7F6000','#C00000','#C00000'];
+const gapColors = gaps.map(g => g >= 0 ? '#375623' : '#C00000');
+
+const channels = ['Mobile App','Website','Social Commerce','Marketplace'];
+const ppo = [36.32,31.60,17.11,15.40];
+const ppo_before = [36.32,31.60,26.98,34.37];
+const chanColors = ['#375623','#2E75B6','#7F6000','#C00000'];
+
+const months = ['Jan\'24','Feb\'24','Mar\'24','Apr\'24','May\'24','Jun\'24','Jul\'24','Aug\'24','Sep\'24','Oct\'24','Nov\'24','Dec\'24','Jan\'25','Feb\'25','Mar\'25','Apr\'25','May\'25','Jun\'25','Jul\'25','Aug\'25','Sep\'25','Oct\'25','Nov\'25','Dec\'25'];
+const monthlyRoas = [15.28,24.31,25.53,9.77,19.83,19.60,12.80,11.02,21.41,22.82,9.90,12.90,13.19,16.98,10.37,22.28,20.14,22.37,9.64,13.80,6.77,16.57,17.26,18.38];
+const roasColors = monthlyRoas.map(r => r>=20?'#375623':r>=15?'#2E75B6':r>=10?'#7F6000':'#C00000');
+
+const retRates = [8.61,8.37,8.19,7.19,7.00,6.00,5.85,5.67];
+const retCats = ['Electronics','Books','Clothing','Sports','Toys','Home & Kitchen','Beauty','Food & Bev.'];
+const refunds = [4078,2106,3209,2008,2470,2340,866,3505];
+const chanRetRates = [9.14,7.30,7.04,6.44];
+const chanRetColors = ['#C00000','#7F6000','#7F6000','#375623'];
+
+setTimeout(() => {
+
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: { labels: cats, datasets: [{ data: profits, backgroundColor: catColors, borderRadius: 3 }] },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { ...baseOpts.scales.x, ticks: { ...baseOpts.scales.x.ticks, callback: v => '$'+Math.round(v/1000)+'K' } }, y: { ...baseOpts.scales.y, ticks: { color: textColor, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('c2'), {
+  type: 'doughnut',
+  data: { labels: channels, datasets: [{ data: [92991,71893,49505,21929], backgroundColor: ['#2E75B6','#375623','#7F6000','#C00000'], borderWidth: 0 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+});
+
+new Chart(document.getElementById('c3'), {
+  type: 'line',
+  data: { labels: months, datasets: [{ data: monthlyRoas, borderColor: '#2E75B6', backgroundColor: 'rgba(46,117,182,0.08)', tension: 0.3, pointRadius: 3, pointBackgroundColor: roasColors, fill: true, borderWidth: 1.5 }] },
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x, ticks: { color: textColor, font: { size: 9 }, maxRotation: 45, autoSkip: false, callback: (v,i) => i%3===0?months[i]:'' } }, y: { ...baseOpts.scales.y, ticks: { callback: v => v+'x', color: textColor, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('c4'), {
+  type: 'bar',
+  data: { labels: cats, datasets: [{ data: margins, backgroundColor: catColors, borderRadius: 3 }] },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { ...baseOpts.scales.x, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } } }, y: { ...baseOpts.scales.y } } }
+});
+
+new Chart(document.getElementById('c5'), {
+  type: 'scatter',
+  data: { datasets: cats.map((c,i) => ({ label: c, data: [{ x: shipPct[i], y: margins[i] }], backgroundColor: catColors[i], pointRadius: 7, pointHoverRadius: 9 })) },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: Ship ${ctx.parsed.x}% → Margin ${ctx.parsed.y}%` } } },
+    scales: { x: { title: { display: true, text: 'Shipping Cost %', color: textColor, font: { size: 10 } }, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 10, max: 32 }, y: { title: { display: true, text: 'Profit Margin %', color: textColor, font: { size: 10 } }, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 8, max: 35 } }
+  }
+});
+
+new Chart(document.getElementById('c6'), {
+  type: 'bar',
+  data: { labels: channels, datasets: [{ data: ppo, backgroundColor: chanColors, borderRadius: 4 }] },
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x }, y: { ...baseOpts.scales.y, ticks: { callback: v => '$'+v, color: textColor, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('c7'), {
+  type: 'bar',
+  data: { labels: channels, datasets: [
+    { label: 'Before Fees', data: ppo_before, backgroundColor: chanColors.map(c => c+'55'), borderColor: chanColors, borderWidth: 1.5, borderRadius: 4 },
+    { label: 'After Fees', data: ppo, backgroundColor: chanColors, borderRadius: 4 }
+  ]},
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x }, y: { ...baseOpts.scales.y, ticks: { callback: v => '$'+v, color: textColor, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('c8'), {
+  type: 'bar',
+  data: { labels: retCats, datasets: [{ data: retRates, backgroundColor: retRates.map(r => r>=8?'#C00000':r>=7?'#7F6000':'#375623'), borderRadius: 3 }] },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { ...baseOpts.scales.x, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } } }, y: { ...baseOpts.scales.y } } }
+});
+
+new Chart(document.getElementById('c9'), {
+  type: 'bubble',
+  data: { datasets: retCats.map((c,i) => ({ label: c, data: [{ x: retRates[i], y: refunds[i]/1000, r: 8 }], backgroundColor: retRates[i]>8?'rgba(192,0,0,0.7)':refunds[i]>3000?'rgba(127,96,0,0.7)':'rgba(55,86,35,0.7)' })) },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x}% rate, $${(ctx.parsed.y*1000).toFixed(0)} lost` } } },
+    scales: { x: { title: { display: true, text: 'Return Rate %', color: textColor, font: { size: 10 } }, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 4.5, max: 9.5 }, y: { title: { display: true, text: 'Revenue Lost ($K)', color: textColor, font: { size: 10 } }, ticks: { callback: v => '$'+v+'K', color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 0.5, max: 5 } }
+  }
+});
+
+new Chart(document.getElementById('c10'), {
+  type: 'bar',
+  data: { labels: channels, datasets: [{ data: chanRetRates, backgroundColor: chanRetColors, borderRadius: 4 }] },
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x }, y: { ...baseOpts.scales.y, ticks: { callback: v => v+'%', color: textColor, font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('c11'), {
+  type: 'bar',
+  data: { labels: platforms, datasets: [{ data: roas, backgroundColor: platformColors, borderRadius: 3 }] },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { ...baseOpts.scales.x, ticks: { callback: v => v+'x', color: textColor, font: { size: 10 } } }, y: { ...baseOpts.scales.y } } }
+});
+
+new Chart(document.getElementById('c12'), {
+  type: 'bar',
+  data: { labels: platforms, datasets: [{ data: gaps, backgroundColor: gapColors, borderRadius: 3 }] },
+  options: { ...baseOpts, indexAxis: 'y', scales: { x: { ...baseOpts.scales.x, ticks: { callback: v => (v>=0?'+':'')+v+'%', color: textColor, font: { size: 10 } } }, y: { ...baseOpts.scales.y } } }
+});
+
+new Chart(document.getElementById('c13'), {
+  type: 'bar',
+  data: { labels: months, datasets: [{ data: monthlyRoas, backgroundColor: roasColors, borderRadius: 2 }] },
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x, ticks: { color: textColor, font: { size: 9 }, maxRotation: 45, autoSkip: false, callback: (v,i) => i%3===0?months[i]:'' } }, y: { ...baseOpts.scales.y, ticks: { callback: v => v+'x', color: textColor, font: { size: 10 } } } } }
+});
+
+const currentSpends = [24461,106452,152546,65154,97663,57229];
+const proposedSpends = [0,53226,129664,65154,97663,57229];
+const cutPlatforms = ['Email','Facebook','Google','Instagram','Influencer','TikTok'];
+new Chart(document.getElementById('c14'), {
+  type: 'bar',
+  data: { labels: cutPlatforms, datasets: [
+    { label: 'Current', data: currentSpends, backgroundColor: 'rgba(46,117,182,0.4)', borderColor: '#2E75B6', borderWidth: 1, borderRadius: 3 },
+    { label: 'Proposed', data: proposedSpends, backgroundColor: proposedSpends.map((v,i) => v < currentSpends[i] ? 'rgba(192,0,0,0.7)' : 'rgba(55,86,35,0.7)'), borderRadius: 3 }
+  ]},
+  options: { ...baseOpts, scales: { x: { ...baseOpts.scales.x }, y: { ...baseOpts.scales.y, ticks: { callback: v => '$'+Math.round(v/1000)+'K', color: textColor, font: { size: 10 } } } } }
+});
+
+}, 300);
+</script>
