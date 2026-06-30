@@ -1,0 +1,378 @@
+// ============================================================
+// POWER BI DAX MEASURES — E-Commerce Profitability Dashboard
+// Prepared by: Victor Lu
+// Analysis Period: January 2024 – December 2025
+//
+// HOW TO USE:
+//   1. In Power BI Desktop, open the Modeling tab
+//   2. Click "New Measure" for each measure below
+//   3. Paste the DAX formula and press Enter
+//   4. Organise measures into a dedicated "Measures" table
+// ============================================================
+
+
+// ============================================================
+// SECTION 1: CORE FINANCIALS
+// ============================================================
+
+Total Orders =
+COUNTROWS(orders)
+
+Gross Revenue =
+SUM(orders[gross_revenue])
+
+Net Revenue =
+SUM(orders[net_revenue])
+
+Total Profit =
+SUM(orders[profit])
+
+Total Costs =
+SUM(orders[total_costs])
+
+Overall Margin % =
+DIVIDE(
+    SUM(orders[profit]),
+    SUM(orders[net_revenue]),
+    0
+) * 100
+
+Total Refunds =
+SUM(orders[refund_amount])
+
+Total Platform Fees =
+SUM(orders[platform_fee])
+
+Total Shipping Cost =
+SUM(orders[shipping_cost])
+
+Total Product Cost =
+SUM(orders[product_cost])
+
+Total Discounts =
+SUM(orders[discount_amount])
+
+
+// ============================================================
+// SECTION 2: CATEGORY PROFITABILITY
+// ============================================================
+
+Category Profit Margin % =
+DIVIDE(
+    SUM(orders[profit]),
+    SUM(orders[net_revenue]),
+    0
+) * 100
+
+Product Cost % of Gross =
+DIVIDE(
+    SUM(orders[product_cost]),
+    SUM(orders[gross_revenue]),
+    0
+) * 100
+
+Shipping Cost % of Gross =
+DIVIDE(
+    SUM(orders[shipping_cost]),
+    SUM(orders[gross_revenue]),
+    0
+) * 100
+
+Discount % of Gross =
+DIVIDE(
+    SUM(orders[discount_amount]),
+    SUM(orders[gross_revenue]),
+    0
+) * 100
+
+Avg Discount Rate =
+AVERAGE(orders[discount_pct])
+
+Top Category by Margin =
+CALCULATE(
+    FIRSTNONBLANK(orders[primary_category], 1),
+    TOPN(1,
+        SUMMARIZE(orders, orders[primary_category],
+            "Margin", DIVIDE(SUM(orders[profit]), SUM(orders[net_revenue]), 0)),
+        [Margin], DESC
+    )
+)
+
+Profit Rank by Category =
+RANKX(
+    ALL(orders[primary_category]),
+    CALCULATE(DIVIDE(SUM(orders[profit]), SUM(orders[net_revenue]), 0)),
+    ,
+    DESC,
+    DENSE
+)
+
+
+// ============================================================
+// SECTION 3: CHANNEL PROFITABILITY
+// ============================================================
+
+Profit per Order =
+DIVIDE(
+    SUM(orders[profit]),
+    COUNTROWS(orders),
+    0
+)
+
+Avg Platform Fee per Order =
+DIVIDE(
+    SUM(orders[platform_fee]),
+    COUNTROWS(orders),
+    0
+)
+
+Profit per Order Before Fees =
+DIVIDE(
+    SUM(orders[profit]) + SUM(orders[platform_fee]),
+    COUNTROWS(orders),
+    0
+)
+
+Platform Fee Drag % =
+DIVIDE(
+    SUM(orders[platform_fee]),
+    SUM(orders[profit]) + SUM(orders[platform_fee]),
+    0
+) * 100
+
+// Positive = fees consumed this % of pre-fee profit
+// 55.2% for Marketplace means $18.97 fee reduced $34.37 to $15.40
+
+Avg Order Value =
+DIVIDE(
+    SUM(orders[gross_revenue]),
+    COUNTROWS(orders),
+    0
+)
+
+Channel Profit Margin % =
+DIVIDE(
+    SUM(orders[profit]),
+    SUM(orders[net_revenue]),
+    0
+) * 100
+
+
+// ============================================================
+// SECTION 4: RETURN RATES
+// ============================================================
+
+Returned Orders =
+CALCULATE(
+    COUNTROWS(orders),
+    orders[returned] = "Yes"
+)
+
+Return Rate % =
+DIVIDE(
+    CALCULATE(COUNTROWS(orders), orders[returned] = "Yes"),
+    COUNTROWS(orders),
+    0
+) * 100
+
+Revenue Lost to Returns =
+CALCULATE(
+    SUM(orders[refund_amount]),
+    orders[returned] = "Yes"
+)
+
+Revenue Lost % of Gross =
+DIVIDE(
+    CALCULATE(SUM(orders[refund_amount]), orders[returned] = "Yes"),
+    SUM(orders[gross_revenue]),
+    0
+) * 100
+
+Overall Return Rate % =
+DIVIDE(
+    CALCULATE(COUNTROWS(orders), orders[returned] = "Yes"),
+    COUNTROWS(orders),
+    0
+) * 100
+
+Avg Refund per Returned Order =
+DIVIDE(
+    CALCULATE(SUM(orders[refund_amount]), orders[returned] = "Yes"),
+    CALCULATE(COUNTROWS(orders), orders[returned] = "Yes"),
+    0
+)
+
+
+// ============================================================
+// SECTION 5: MARKETING ROI (uses marketing_spend table)
+// ============================================================
+
+Total Marketing Spend =
+SUM(marketing_spend[spend])
+
+Total Attributed Revenue =
+SUM(marketing_spend[revenue_attributed])
+
+Platform ROAS =
+DIVIDE(
+    SUM(marketing_spend[revenue_attributed]),
+    SUM(marketing_spend[spend]),
+    0
+)
+
+Avg CPA =
+AVERAGE(marketing_spend[cpa])
+
+Total Conversions =
+SUM(marketing_spend[conversions])
+
+Spend Share % =
+DIVIDE(
+    SUM(marketing_spend[spend]),
+    CALCULATE(SUM(marketing_spend[spend]), ALL(marketing_spend[platform])),
+    0
+) * 100
+
+Revenue Share % =
+DIVIDE(
+    SUM(marketing_spend[revenue_attributed]),
+    CALCULATE(SUM(marketing_spend[revenue_attributed]), ALL(marketing_spend[platform])),
+    0
+) * 100
+
+Efficiency Gap % =
+// Positive = earns more than its share of budget (efficient)
+// Negative = costs more than it earns (inefficient)
+[Revenue Share %] - [Spend Share %]
+
+ROAS Classification =
+SWITCH(
+    TRUE(),
+    [Platform ROAS] >= 20, "Efficient — Grow",
+    [Platform ROAS] >= 15, "Acceptable — Hold",
+    [Platform ROAS] >= 10, "Below Target — Reduce",
+    "Underperforming — Cut"
+)
+
+
+// ============================================================
+// SECTION 6: BUDGET CUT ANALYSIS
+// ============================================================
+
+Proposed 20% Cut Amount =
+SUM(marketing_spend[spend]) * 0.20
+
+Current Budget Total =
+CALCULATE(
+    SUM(marketing_spend[spend]),
+    ALL(marketing_spend[platform])
+)
+
+Cut Target (20%) =
+[Current Budget Total] * 0.20
+
+Platforms to Cut Spend =
+// Returns the proposed new budget after 20% cut for low-ROAS platforms
+// Manual: Email = $0, Facebook = 50% cut, Google = 15% cut
+VAR PlatformName = SELECTEDVALUE(marketing_spend[platform])
+VAR CurrentSpend = SUM(marketing_spend[spend])
+RETURN
+SWITCH(
+    PlatformName,
+    "Email Marketing", 0,
+    "Facebook Ads", CurrentSpend * 0.50,
+    "Google Ads", CurrentSpend * 0.85,
+    CurrentSpend
+)
+
+Recommended Saving per Platform =
+VAR PlatformName = SELECTEDVALUE(marketing_spend[platform])
+VAR CurrentSpend = SUM(marketing_spend[spend])
+RETURN
+SWITCH(
+    PlatformName,
+    "Email Marketing", CurrentSpend,
+    "Facebook Ads", CurrentSpend * 0.50,
+    "Google Ads", CurrentSpend * 0.15,
+    0
+)
+
+Total Recommended Savings =
+SUMX(
+    VALUES(marketing_spend[platform]),
+    [Recommended Saving per Platform]
+)
+
+Savings vs Target =
+// Positive = target met; negative = shortfall
+[Total Recommended Savings] - [Cut Target (20%)]
+
+
+// ============================================================
+// SECTION 7: TIME INTELLIGENCE (if date table added)
+// ============================================================
+
+// First add a Date table in Power BI:
+// Home → New Table → DateTable = CALENDAR(DATE(2024,1,1), DATE(2025,12,31))
+// Then add columns: Year, Month, MonthName, Quarter, YearMonth
+
+MoM ROAS Change % =
+VAR CurrentROAS = [Platform ROAS]
+VAR PrevROAS =
+    CALCULATE(
+        [Platform ROAS],
+        DATEADD('DateTable'[Date], -1, MONTH)
+    )
+RETURN
+DIVIDE(CurrentROAS - PrevROAS, PrevROAS, 0) * 100
+
+YTD Revenue =
+TOTALYTD(
+    SUM(orders[gross_revenue]),
+    'DateTable'[Date]
+)
+
+YTD Profit =
+TOTALYTD(
+    SUM(orders[profit]),
+    'DateTable'[Date]
+)
+
+Rolling 3M Avg ROAS =
+AVERAGEX(
+    DATESINPERIOD('DateTable'[Date], LASTDATE('DateTable'[Date]), -3, MONTH),
+    [Platform ROAS]
+)
+
+
+// ============================================================
+// SECTION 8: KPI CARD FORMATTING HELPERS
+// ============================================================
+
+// Use these in KPI card conditional formatting
+
+Margin Status =
+// Returns "Good", "Watch", or "Low" for conditional formatting
+SWITCH(
+    TRUE(),
+    [Overall Margin %] >= 25, "Good",
+    [Overall Margin %] >= 15, "Watch",
+    "Low"
+)
+
+Return Rate Status =
+SWITCH(
+    TRUE(),
+    [Return Rate %] <= 6, "Good",
+    [Return Rate %] <= 8, "Watch",
+    "High"
+)
+
+ROAS Status =
+SWITCH(
+    TRUE(),
+    [Platform ROAS] >= 20, "Efficient",
+    [Platform ROAS] >= 15, "Acceptable",
+    [Platform ROAS] >= 10, "Below Target",
+    "Underperforming"
+)
